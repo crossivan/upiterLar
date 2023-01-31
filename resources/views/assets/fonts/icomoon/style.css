@@ -1,0 +1,84 @@
+@font-face {
+  font-family: 'icomoon';
+  src:  url('fonts/icomoon.eot?mfgifd');
+  src:  url('fonts/icomoon.eot?mfgifd#iefix') format('embedded-opentype'),
+    url('fonts/icomoon.ttf?mfgifd') format('truetype'),
+    url('fonts/icomoon.woff?mfgifd') format('woff'),
+    url('fonts/icomoon.svg?mfgifd#icomoon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  /* use !important to prevent issues with browser extensions that change fonts */
+  font-family: 'icomoon' !important;
+  speak: never;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+
+  /* Better Font Rendering =========== */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-camera:before {
+  content: "\e900";
+}
+.icon-print:before {
+  content: "\e901";
+}
+.icon-retual:before {
+  content: "\e902";
+}
+.icon-taho:before {
+  content: "\e907";
+}
+.icon-about:before {
+  content: "\e908";
+}
+.icon-check:before {
+  content: "\e909";
+}
+.icon-exit:before {
+  content: "\e90a";
+}
+.icon-crop-tool1:before {
+  content: "\e90b";
+}
+.icon-trash:before {
+  content: "\e90c";
+}
+.icon-height:before {
+  content: "\e90d";
+}
+.icon-rotate_left:before {
+  content: "\e90e";
+}
+.icon-rotate_right:before {
+  content: "\e90f";
+}
+.icon-rotate_left_90:before {
+  content: "\e910";
+}
+.icon-rotate_right_90:before {
+  content: "\e911";
+}
+.icon-zoom-in2:before {
+  content: "\e912";
+}
+.icon-zoom-out2:before {
+  content: "\e913";
+}
+.icon-flip_vertical:before {
+  content: "\e914";
+}
+.icon-flip_horizontal:before {
+  content: "\e915";
+}
+.icon-cart:before {
+  content: "\e916";
+}
