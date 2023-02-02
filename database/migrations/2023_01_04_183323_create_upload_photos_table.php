@@ -15,9 +15,10 @@ return new class extends Migration
     {
         Schema::create('upload_photos', function (Blueprint $table) {
             $table->id();
-            $table->string('name_original')->nullable();
-            $table->string('name_hash')->nullable();
-            $table->string('file_size')->nullable();
+            $table->string('name_original');
+            $table->string('name_hash');
+            $table->string('file_size');
+            $table->string('crop_params') -> nullable();
             $table->timestamps();
         });
     }

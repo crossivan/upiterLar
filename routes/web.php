@@ -19,7 +19,7 @@ Route::get('/', function () {
 });
 
 
-Route::fallback(function ()
-{
-    return redirect()->to('/');
-});
+//Route::fallback(function ()
+//{
+//    return redirect()->to('/');
+//});

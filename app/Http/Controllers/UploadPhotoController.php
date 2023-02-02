@@ -3,17 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\UploadPhoto;
-use File;
-use http\Client\Response;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Intervention\Image\Facades\Image;
 use Storage;
-use Str;
 use Validator;
+use function MongoDB\BSON\toJSON;
 
 class UploadPhotoController extends Controller
 {
-
     public function upload(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -45,8 +43,8 @@ class UploadPhotoController extends Controller
         $db = UploadPhoto::create(
             [
                 'name_original' => $orig_name,
-                'name_hash' => $hash_name,
-                'file_size' => $size
+                'name_hash'     => $hash_name,
+                'file_size'     => $size
             ]
         );
 
@@ -57,7 +55,6 @@ class UploadPhotoController extends Controller
         ], 201);
     }
 
-
     public function replace(Request $request)
     {
         $nameOld      = $request->nameOld;
@@ -67,6 +64,10 @@ class UploadPhotoController extends Controller
 
         $flipH        = $request->flipH;
         $flipV        = $request->flipV;
+        if ($flipV == 'true') $flip = 'v';
+        elseif ($flipH == 'true') $flip = 'h';
+        else $flip = null;
+
         $angle        = $request->angle;
         $canvasWidth  = $request->canvasWidth;
         $canvasHeight = $request->canvasHeight;
@@ -75,21 +76,82 @@ class UploadPhotoController extends Controller
         $width        = $cropParams['width'];
         $height       = $cropParams['height'];
 
-//        dd($request->cropParams);
-
         $nameNew = rand(0,99).$nameOld;
+
+        $cropParams = json_encode([
+            'x'            => $x,
+            'y'            => $y,
+            'width'        => $width,
+            'height'       => $height,
+            'canvasWidth'  => $canvasWidth,
+            'canvasHeight' => $canvasHeight,
+            'angle'        => $angle,
+            'flip'         => $flip
+        ]);
+
 
         $thumbnail = Image::make(Storage::path($path).'/origin/'.$nameOld);
         Storage::delete($path . '/origin/' . $nameOld);
         $thumbnail->save(Storage::path($path).'/origin/'.$nameNew);
 
+//        $thumbnail
+//            ->resizeCanvas($canvasWidth, $canvasHeight, 'center', false, '#ffffff')
+//            ->rotate(-$angle, '#ffffff')
+//            ->flip($flip);
+//
+//        //Дельта размеров холста при повороте.
+//        $dx = round(($thumbnail->width() - $canvasWidth)/2);
+//        $dy = round(($thumbnail->height() - $canvasHeight)/2);
+//
+//        $thumbnail
+//            ->crop($width, $height, $x+$dx, $y+$dy)
+//            ->resize(300, 300, function ($constraint) {
+//                $constraint->aspectRatio();
+//                $constraint->upsize();
+//            })
+//            ->encode('jpg',70);
+
+        $thumbnail = $this->transformPhoto($path, $nameNew, $cropParams);
+
+        Storage::makeDirectory($path.'/thumbnail');
+        Storage::delete($path . '/thumbnail/' . $nameOld);
+        $thumbnail->save(Storage::path($path).'/thumbnail/'.$nameNew);
+
+        $db = UploadPhoto::where('name_hash', $nameOld)-> update(
+            [
+                'name_hash'   => $nameNew,
+                'crop_params' => $cropParams,
+            ]
+        );
+
+        return response()->json([
+            'message' => 'File replace',
+            'hash_name' => $nameNew,
+            'path' => '/storage/photos/'.$macAddr.'/thumbnail/'.$nameNew
+        ], 201);
+    }
+
+    private function transformPhoto(string $path, string $name, mixed $cropParams)
+    {
+        $thumbnail = Image::make(Storage::path($path).'/origin/'.$name);
+
+        $cropParams = json_decode($cropParams, true);
+
+        $x            = $cropParams['x'];
+        $y            = $cropParams['y'];
+        $width        = $cropParams['width'];
+        $height       = $cropParams['height'];
+        $canvasWidth  = $cropParams['canvasWidth'];
+        $canvasHeight = $cropParams['canvasHeight'];
+        $angle        = $cropParams['angle'];
+        $flip         = $cropParams['flip'];
+
         $thumbnail
             ->resizeCanvas($canvasWidth, $canvasHeight, 'center', false, '#ffffff')
-            ->rotate(-$angle, '#ffffff');
+            ->rotate(-$angle, '#ffffff')
+            ->flip($flip);
 
-        if ($flipV == 'true') $thumbnail->flip('v');
-        if ($flipH == 'true') $thumbnail->flip('h');
-
+        //Дельта размеров холста при повороте.
         $dx = round(($thumbnail->width() - $canvasWidth)/2);
         $dy = round(($thumbnail->height() - $canvasHeight)/2);
 
@@ -101,22 +163,7 @@ class UploadPhotoController extends Controller
             })
             ->encode('jpg',70);
 
-        Storage::makeDirectory($path.'/thumbnail');
-        Storage::delete($path . '/thumbnail/' . $nameOld);
-        $thumbnail->save(Storage::path($path).'/thumbnail/'.$nameNew);
-
-        $db = UploadPhoto::where('name_hash', $nameOld)-> update(
-            [
-                'name_hash' => $nameNew
-            ]
-        );
-
-        return response()->json([
-            'message' => 'File replace',
-            'hash_name' => $nameNew,
-            'path' => '/storage/photos/'.$macAddr.'/thumbnail/'.$nameNew
-        ], 201);
-
+        return $thumbnail;
     }
 
     /**
@@ -125,7 +172,7 @@ class UploadPhotoController extends Controller
      * @param  \App\Models\UploadPhoto  $uploadPhoto
      * @return \Illuminate\Http\Response
      */
-    public function delete(Request $request, $name)
+    public function delete($name)
     {
         $macAddr = substr(exec('getmac'), 0, 17);
         $path    = 'public/photos/'.$macAddr;
@@ -225,4 +272,6 @@ class UploadPhotoController extends Controller
     {
         //
     }
+
+
 }
