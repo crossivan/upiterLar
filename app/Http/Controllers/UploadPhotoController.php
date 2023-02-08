@@ -170,13 +170,12 @@ class UploadPhotoController extends Controller
      * Remove the specified resource from storage.
      *
      * @param  \App\Models\UploadPhoto  $uploadPhoto
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function delete($name)
     {
         $macAddr = substr(exec('getmac'), 0, 17);
         $path    = 'public/photos/'.$macAddr;
-
 
 //        $photo = Image::make(Storage::path($path).'/origin/'.$name);
         Storage::delete($path . '/origin/' . $name);
@@ -187,12 +186,6 @@ class UploadPhotoController extends Controller
         return response()->json([
             'message' => 'File deleted'
         ], 201);
-
-//        return response()->json([
-//            'message' => 'File replace',
-//            'hash_name' => $name,
-//            'path' => '/storage/photos/'.$macAddr.'/thumbnail/'.$name
-//        ], 201);
     }
 
 
