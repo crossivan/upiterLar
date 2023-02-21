@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -14,51 +14,51 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-         \App\Models\User::factory()->create([
-             'name' => 'admin',
-             'role' => 'admin',
-             'email' => 'crossivan@yandex.ru',
-             'password' => bcrypt('1xz2Ktyflove')
-         ]);
+        User::factory()->create([
+            'name' => 'admin',
+            'role' => 'admin',
+            'email' => 'crossivan@yandex.ru',
+            'password' => bcrypt('1xz2Ktyflove')
+        ]);
 
-        \App\Models\User::factory()->create([
+        User::factory()->create([
             'name' => 'Kodak',
-            'role' => 'employee',
+            'role' => 'worker',
             'email' => 'lena.danil4ewa@yandex.ru',
             'password' => bcrypt('kodak')
         ]);
 
-        \App\Models\User::factory()->create([
+        User::factory()->create([
             'name' => 'Колибри',
-            'role' => 'employee',
+            'role' => 'worker',
             'email' => 'kolibri_foto@mail.ru',
             'password' => bcrypt('kolibri')
         ]);
-        \App\Models\User::factory()->create([
+        User::factory()->create([
             'name' => 'Фламинго',
-            'role' => 'employee',
+            'role' => 'worker',
             'email' => 'fotoub95@mail.ru',
             'password' => bcrypt('flamingo')
         ]);
-        \App\Models\User::factory()->create([
+        User::factory()->create([
             'name' => 'Позитифф',
-            'role' => 'employee',
+            'role' => 'worker',
             'email' => 'guffyc1@yandex.ru',
             'password' => bcrypt('Positive')
         ]);
-        \App\Models\User::factory()->create([
+        User::factory()->create([
             'name' => 'Проспект',
-            'role' => 'employee',
+            'role' => 'worker',
             'email' => 'prospektlenina17@yandex.ru',
             'password' => bcrypt('Prospekt')
         ]);
-        \App\Models\User::factory()->create([
+        User::factory()->create([
             'name' => 'Колорит',
-            'role' => 'employee',
+            'role' => 'worker',
             'email' => '89876828282@mail.ru',
             'password' => bcrypt('Colorit')
         ]);
 
-        \App\Models\User::factory(92)->create();
+        User::factory(92)->create();
     }
 }

@@ -24,11 +24,15 @@ class User extends Authenticatable implements JWTSubject
 //        'password',
 //    ];
 
-
     protected $hidden = [
         'password',
         'remember_token',
     ];
+
+    public function rituals(): HasMany
+    {
+        return $this->hasMany(Ritual::class);
+    }
 
     /**
      * The attributes that should be cast.
@@ -38,11 +42,6 @@ class User extends Authenticatable implements JWTSubject
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-
-    public function ceramics(): HasMany
-    {
-        return $this->hasMany(Ritual::class);
-    }
 
     public function getJWTIdentifier() {
         return $this->getKey();

@@ -23,14 +23,17 @@ return new class extends Migration
 //                ->on('users')->references('id');
 
             $table->unsignedTinyInteger('order_number');
-            $table->unsignedTinyInteger('size');
-            $table->string('shape');
-            $table->string('holes');
+            $table->string('hash_name')->nullable();
+            $table->boolean('shape');
+            $table->boolean('orientation');
+            $table->boolean('holes');
+            $table->unsignedTinyInteger('sizes');
             $table->boolean('cross');
-            $table->boolean('photo');
+            $table->boolean('withText');
+            $table->boolean('withoutPhoto');
             $table->string('epitaph')->nullable();
+            $table->string('last_name')->nullable();
             $table->string('first_name')->nullable();
-            $table->string('second_name')->nullable();
             $table->string('patronymic')->nullable();
             $table->date('birthday')->nullable();
             $table->date('day_of_death')->nullable();

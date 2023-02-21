@@ -12,6 +12,11 @@ use function MongoDB\BSON\toJSON;
 
 class UploadPhotoController extends Controller
 {
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function upload(Request $request)
     {
         $validator = Validator::make($request->all(), [

@@ -125,6 +125,6 @@ class AuthController extends Controller
 
     public function ritual()
     {
-        return 'ritual';
+        return 'ritualMiddleware';
     }
 }
