@@ -10,4 +10,5 @@ class UploadPhoto extends Model
     use HasFactory;
 
     protected $guarded = [];
+
 }

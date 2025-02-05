@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\UploadPhoto;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Intervention\Image\Facades\Image;
+use Intervention\Image\Encoders\JpegEncoder;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 use Storage;
 use Validator;
 use function MongoDB\BSON\toJSON;
@@ -37,11 +39,20 @@ class UploadPhotoController extends Controller
 
 //        $file->storeAs('public/avatars', $orig_name);
         $file->store($path.'/origin');
-        $thumbnail = Image::make(Storage::path($path).'/origin/'.$hash_name);
-        $thumbnail->resize(300, 300, function ($constraint) {
-            $constraint->aspectRatio();
-            $constraint->upsize();
-        })->encode('jpg',70);
+
+        $manager = new ImageManager(new Driver());
+
+        $thumbnail = $manager->read(Storage::path($path).'/origin/'.$hash_name);
+        //$thumbnail = Image::make(Storage::path($path).'/origin/'.$hash_name);
+
+        $thumbnail->scale(width: 300, height: 300);
+        $thumbnail->encode(new JpegEncoder(quality: 70));
+
+    //    $thumbnail->resize(300, 300, function ($constraint) {
+    //        $constraint->aspectRatio();
+    //        $constraint->upsize();
+    //    })->encode('jpg',70);
+
         Storage::makeDirectory($path.'/thumbnail');
         $thumbnail->save(Storage::path($path).'/thumbnail/'.$hash_name);
 
