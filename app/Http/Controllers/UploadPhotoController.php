@@ -6,11 +6,11 @@ use App\Models\UploadPhoto;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Intervention\Image\Encoders\JpegEncoder;
+use Intervention\Image\Laravel\Facades\Image;
 use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Gd\Driver;
 use Storage;
 use Validator;
-use function MongoDB\BSON\toJSON;
+//use function MongoDB\BSON\toJSON;
 
 class UploadPhotoController extends Controller
 {
@@ -40,18 +40,18 @@ class UploadPhotoController extends Controller
 //        $file->storeAs('public/avatars', $orig_name);
         $file->store($path.'/origin');
 
-        $manager = new ImageManager(new Driver());
+        $manager = ImageManager::gd(
+            autoOrientation: false,
+            decodeAnimation: false,
+            blendingColor: 'ff5500',
+            strip: false
+        );
 
         $thumbnail = $manager->read(Storage::path($path).'/origin/'.$hash_name);
-        //$thumbnail = Image::make(Storage::path($path).'/origin/'.$hash_name);
+        //$thumbnail = Image::read(Storage::path($path).'/origin/'.$hash_name);
 
-        $thumbnail->scale(width: 300, height: 300);
+        $thumbnail->scale(300,  300);
         $thumbnail->encode(new JpegEncoder(quality: 70));
-
-    //    $thumbnail->resize(300, 300, function ($constraint) {
-    //        $constraint->aspectRatio();
-    //        $constraint->upsize();
-    //    })->encode('jpg',70);
 
         Storage::makeDirectory($path.'/thumbnail');
         $thumbnail->save(Storage::path($path).'/thumbnail/'.$hash_name);
@@ -80,10 +80,6 @@ class UploadPhotoController extends Controller
 
         $flipH        = $request->flipH;
         $flipV        = $request->flipV;
-        if ($flipV == 'true') $flip = 'v';
-        elseif ($flipH == 'true') $flip = 'h';
-        else $flip = null;
-
         $angle        = $request->angle;
         $canvasWidth  = $request->canvasWidth;
         $canvasHeight = $request->canvasHeight;
@@ -94,40 +90,36 @@ class UploadPhotoController extends Controller
 
         $nameNew = rand(0,99).$nameOld;
 
-        $cropParams = json_encode([
-            'x'            => $x,
-            'y'            => $y,
-            'width'        => $width,
-            'height'       => $height,
-            'canvasWidth'  => $canvasWidth,
-            'canvasHeight' => $canvasHeight,
-            'angle'        => $angle,
-            'flip'         => $flip
-        ]);
+        $manager = ImageManager::gd(
+            autoOrientation: false,
+            decodeAnimation: false,
+            blendingColor: '#ffffff',
+            strip: false
+        );
 
+        $thumbnail = $manager->read(Storage::path($path).'/origin/'.$nameOld);
 
-        $thumbnail = Image::make(Storage::path($path).'/origin/'.$nameOld);
         Storage::delete($path . '/origin/' . $nameOld);
         $thumbnail->save(Storage::path($path).'/origin/'.$nameNew);
 
-//        $thumbnail
-//            ->resizeCanvas($canvasWidth, $canvasHeight, 'center', false, '#ffffff')
-//            ->rotate(-$angle, '#ffffff')
-//            ->flip($flip);
-//
-//        //Дельта размеров холста при повороте.
-//        $dx = round(($thumbnail->width() - $canvasWidth)/2);
-//        $dy = round(($thumbnail->height() - $canvasHeight)/2);
-//
-//        $thumbnail
-//            ->crop($width, $height, $x+$dx, $y+$dy)
-//            ->resize(300, 300, function ($constraint) {
-//                $constraint->aspectRatio();
-//                $constraint->upsize();
-//            })
-//            ->encode('jpg',70);
+        $thumbnail = $manager->read(Storage::path($path).'/origin/'.$nameNew);
 
-        $thumbnail = $this->transformPhoto($path, $nameNew, $cropParams);
+        $thumbnail
+            ->resizeCanvas($canvasWidth, $canvasHeight, '#ffffff','center')
+            ->rotate(-$angle, '#ffffff');
+
+        // Отражение изображения по вертикали или горизонтали
+        if ($flipV == 'true') $thumbnail->flip();
+        elseif ($flipH == 'true') $thumbnail->flop();
+
+        //Дельта размеров холста при повороте.
+        $dx = round(($thumbnail->width() - $canvasWidth)/2);
+        $dy = round(($thumbnail->height() - $canvasHeight)/2);
+
+        $thumbnail
+            ->crop($width, $height, $x+$dx, $y+$dy)
+            ->scale(300, 300)
+            ->encode(new JpegEncoder(quality: 70));
 
         Storage::makeDirectory($path.'/thumbnail');
         Storage::delete($path . '/thumbnail/' . $nameOld);
@@ -147,40 +139,6 @@ class UploadPhotoController extends Controller
         ], 201);
     }
 
-    private function transformPhoto(string $path, string $name, mixed $cropParams)
-    {
-        $thumbnail = Image::make(Storage::path($path).'/origin/'.$name);
-
-        $cropParams = json_decode($cropParams, true);
-
-        $x            = $cropParams['x'];
-        $y            = $cropParams['y'];
-        $width        = $cropParams['width'];
-        $height       = $cropParams['height'];
-        $canvasWidth  = $cropParams['canvasWidth'];
-        $canvasHeight = $cropParams['canvasHeight'];
-        $angle        = $cropParams['angle'];
-        $flip         = $cropParams['flip'];
-
-        $thumbnail
-            ->resizeCanvas($canvasWidth, $canvasHeight, 'center', false, '#ffffff')
-            ->rotate(-$angle, '#ffffff')
-            ->flip($flip);
-
-        //Дельта размеров холста при повороте.
-        $dx = round(($thumbnail->width() - $canvasWidth)/2);
-        $dy = round(($thumbnail->height() - $canvasHeight)/2);
-
-        $thumbnail
-            ->crop($width, $height, $x+$dx, $y+$dy)
-            ->resize(300, 300, function ($constraint) {
-                $constraint->aspectRatio();
-                $constraint->upsize();
-            })
-            ->encode('jpg',70);
-
-        return $thumbnail;
-    }
 
     /**
      * Remove the specified resource from storage.

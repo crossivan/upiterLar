@@ -44,9 +44,10 @@ Route::prefix('photo') -> group(function () {
 
 Route::middleware('auth:api')->prefix('ritual') -> group(function () {
     Route::post('/upload', [RitualController::class, 'upload']);
+    Route::post('/photo', [RitualController::class, 'photo']);
     Route::post('/edit', [RitualController::class, 'edit']);
     Route::post('/update', [RitualController::class, 'update']);
-    Route::delete('/{id}', [RitualController::class, 'destroy']);
+    Route::delete('/{name}', [RitualController::class, 'deletePhoto']);
     Route::get('/orders', [RitualController::class, 'list']);
     Route::get('/order?id={id}', [RitualController::class, 'view']);
 });
