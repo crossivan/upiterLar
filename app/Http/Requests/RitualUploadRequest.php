@@ -25,8 +25,12 @@ class RitualUploadRequest extends FormRequest
     {
         return [
             'photo'         => 'nullable|image|exclude_if:withoutPhoto,true',
+            'hash_name'     => 'nullable|string',
+            'colored'       => 'required|boolean',
             'shape'         => 'required|boolean',
+            'frame'         => 'required|integer|numeric',
             'orientation'   => 'required|boolean',
+            'background'    => 'required|integer|numeric',
             'holes'         => 'required|boolean',
             'sizes'         => 'required|integer|numeric|between:0,5',
             'cross'         => 'required|boolean',
@@ -37,7 +41,7 @@ class RitualUploadRequest extends FormRequest
             'first_name'    => 'nullable|string|exclude_if:withText,false',
             'patronymic'    => 'nullable|string|exclude_if:withText,false',
             'birthday'      => 'nullable|date|before:day_of_death',
-            'day_of_death'  => 'nullable|date|before:today|after:birthday',
+            'death'         => 'nullable|date|before:today|after:birthday',
         ];
     }
 }

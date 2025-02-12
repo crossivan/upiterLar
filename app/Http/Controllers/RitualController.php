@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\RitualUploadRequest;
 use App\Models\Ritual;
 use App\Models\UploadPhoto;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Intervention\Image\Encoders\JpegEncoder;
@@ -29,15 +30,7 @@ class RitualController extends Controller
         $clientIP = $request->ip();
         $macAddr = substr(exec('getmac'), 0, 17);
 
-        $file = $request->file('photo');
         $path = 'public/ritual_photos/' . $macAddr;
-//        $size         = $file->getSize();
-//        $hash_name    = $file->hashName();
-//        $orig_name    = $file->getClientOriginalName();
-
-        $hash_name = 'gasvdjjjnsbadjksajk';
-
-//        $file->store($path);
 
         $user_id = auth()->id();
 
@@ -49,10 +42,9 @@ class RitualController extends Controller
         $temp = [
             'user_id' => $user_id,
             'order_number' => $lastOrder + 1,
-            'hash_name' => $hash_name,
         ];
 
-        $db = Ritual::create($temp + $data);
+        Ritual::create($temp + $data);
 
         return response()->json([
             'message' => 'Data upload',
@@ -62,7 +54,6 @@ class RitualController extends Controller
 
     public function photo(Request $request)
     {
-
         $validator = Validator::make($request->all(), [
             'photo' => 'required|image'
         ]);
@@ -70,16 +61,11 @@ class RitualController extends Controller
             return response()->json($validator->errors()->toJson(), 400);
         }
 
-        $clientIP  = $request->ip();
         $macAddr   = substr(exec('getmac'), 0, 17);
-
         $file      = $request->file('photo');
         $path      = 'public/ritual/'.$macAddr;
-//        $size      = $file->getSize();
         $hash_name = $file->hashName();
-        $orig_name = $file->getClientOriginalName();
 
-//        $file->storeAs('public/avatars', $orig_name);
         $file->store($path.'/origin');
 
         $manager = ImageManager::gd(
@@ -90,11 +76,8 @@ class RitualController extends Controller
         );
 
         $thumbnail = $manager->read(Storage::path($path).'/origin/'.$hash_name);
-        //$thumbnail = Image::read(Storage::path($path).'/origin/'.$hash_name);
-
         $thumbnail->scale(300,  300);
         $thumbnail->encode(new JpegEncoder(quality: 70));
-
         Storage::makeDirectory($path.'/thumbnail');
         $thumbnail->save(Storage::path($path).'/thumbnail/'.$hash_name);
 
@@ -128,7 +111,7 @@ class RitualController extends Controller
         Storage::delete($path . '/origin/' . $name);
         Storage::delete($path . '/thumbnail/' . $name);
 
-        $db = UploadPhoto::where('name_hash', $name)-> delete();
+//        Ritual::where('name_hash', $name)-> delete();
 
         return response()->json([
             'message' => 'Photo deleted'
@@ -140,15 +123,32 @@ class RitualController extends Controller
      *
      * @return JsonResponse
      */
-    public function list(): JsonResponse
+    public function orders(): JsonResponse
     {
         $user_id = auth()->id();
 
         $list = Ritual::where('user_id', $user_id)->get();
+        $user_name = User::where('id', $user_id)->value('name');
 
         return response()->json([
             'message' => 'Data read',
+            'user_name' => $user_name,
             'order' => $list
+        ], 201);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param Ritual $ritual
+     * @return JsonResponse
+     */
+    public function deleteOrder($id)
+    {
+        Ritual::where('id', $id)-> delete();
+
+        return response()->json([
+            'message' => 'Order deleted'
         ], 201);
     }
 

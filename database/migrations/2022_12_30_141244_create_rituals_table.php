@@ -24,8 +24,12 @@ return new class extends Migration
 
             $table->unsignedTinyInteger('order_number');
             $table->string('hash_name')->nullable();
+
+            $table->boolean('colored');
             $table->boolean('shape');
+            $table->unsignedTinyInteger('frame');
             $table->boolean('orientation');
+            $table->unsignedTinyInteger('background');
             $table->boolean('holes');
             $table->unsignedTinyInteger('sizes');
             $table->boolean('cross');
@@ -36,7 +40,7 @@ return new class extends Migration
             $table->string('first_name')->nullable();
             $table->string('patronymic')->nullable();
             $table->date('birthday')->nullable();
-            $table->date('day_of_death')->nullable();
+            $table->date('death')->nullable();
             $table->timestamps();
 
             $table->softDeletes();
