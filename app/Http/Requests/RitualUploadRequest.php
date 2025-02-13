@@ -40,7 +40,7 @@ class RitualUploadRequest extends FormRequest
             'last_name'     => 'nullable|string|exclude_if:withText,false',
             'first_name'    => 'nullable|string|exclude_if:withText,false',
             'patronymic'    => 'nullable|string|exclude_if:withText,false',
-            'birthday'      => 'nullable|date|before:day_of_death',
+            'birthday'      => 'nullable|date|before:death',
             'death'         => 'nullable|date|before:today|after:birthday',
         ];
     }

@@ -34,10 +34,15 @@ class RitualController extends Controller
 
         $user_id = auth()->id();
 
-        $lastOrder = Ritual::where('user_id', $user_id)
-            ->latest('id')
-            ->first()
-            ->order_number;
+        try {
+            $lastOrder = Ritual::where('user_id', $user_id)
+                ->latest('id')
+                ->first()
+                ->order_number;
+        }
+        catch (\Exception $e) {
+            $lastOrder = 0;
+        }
 
         $temp = [
             'user_id' => $user_id,
