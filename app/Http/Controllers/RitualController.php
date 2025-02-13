@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RitualUploadRequest;
 use App\Models\Ritual;
-use App\Models\UploadPhoto;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -123,39 +122,6 @@ class RitualController extends Controller
         ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @return JsonResponse
-     */
-    public function orders(): JsonResponse
-    {
-        $user_id = auth()->id();
-
-        $list = Ritual::where('user_id', $user_id)->get();
-        $user_name = User::where('id', $user_id)->value('name');
-
-        return response()->json([
-            'message' => 'Data read',
-            'user_name' => $user_name,
-            'order' => $list
-        ], 201);
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param Ritual $ritual
-     * @return JsonResponse
-     */
-    public function deleteOrder($id)
-    {
-        Ritual::where('id', $id)-> delete();
-
-        return response()->json([
-            'message' => 'Order deleted'
-        ], 201);
-    }
 
     /**
      * Store a newly created resource in storage.
