@@ -26,12 +26,9 @@ class RitualController extends Controller
 
         if(auth()->user()->role === 'user') return response()->json(['message' => 'You don`t have access']);
 
-        $clientIP = $request->ip();
-        $macAddr = substr(exec('getmac'), 0, 17);
-
-        $path = 'public/ritual_photos/' . $macAddr;
-
         $user_id = auth()->id();
+
+        $path = 'public/ritual_photos/' . $user_id;
 
         try {
             $lastOrder = Ritual::where('user_id', $user_id)
@@ -65,9 +62,10 @@ class RitualController extends Controller
             return response()->json($validator->errors()->toJson(), 400);
         }
 
-        $macAddr   = substr(exec('getmac'), 0, 17);
+        $user_id = auth()->id();
+
         $file      = $request->file('photo');
-        $path      = 'public/ritual/'.$macAddr;
+        $path      = 'public/ritual/'.$user_id;
         $hash_name = $file->hashName();
 
         $file->store($path.'/origin');
@@ -96,7 +94,7 @@ class RitualController extends Controller
         return response()->json([
             'message' => 'Photo upload',
             'hash_name' => $hash_name,
-            'path' => '/storage/ritual/'.$macAddr.'/thumbnail/'.$hash_name
+            'path' => '/storage/ritual/'.$user_id.'/thumbnail/'.$hash_name
         ], 201);
     }
 
@@ -108,15 +106,15 @@ class RitualController extends Controller
      */
     public function deletePhoto($name)
     {
-        $macAddr = substr(exec('getmac'), 0, 17);
-        $path    = 'public/ritual/'.$macAddr;
+        $user_id = auth()->id();
+        $path    = 'public/ritual/'.$user_id;
 
 //        $photo = Image::make(Storage::path($path).'/origin/'.$name);
         Storage::delete($path . '/origin/' . $name);
         Storage::delete($path . '/thumbnail/' . $name);
 
 //        Ritual::where('name_hash', $name)-> delete();
-
+//
         return response()->json([
             'message' => 'Photo deleted'
         ], 201);

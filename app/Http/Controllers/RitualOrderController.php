@@ -23,15 +23,54 @@ class RitualOrderController extends Controller
         $user_id = auth()->id();
 
         if($user_id == 1) {
-            $list = Ritual::leftJoin('users', 'rituals.user_id', '=', 'users.id')->get();
-
-//            $list = Ritual::where('user_id', $user_id)->get();
-//            $user_name = User::where('id', $user_id)->value('name');
+            $list = Ritual::Join('users', 'users.id', '=', 'rituals.user_id')->select(
+                'rituals.id',
+                'rituals.user_id',
+                'name',
+                'order_number',
+                'hash_name',
+                'shape',
+                'orientation',
+                'holes',
+                'sizes',
+                'frame',
+                'background',
+                'cross',
+                'withText',
+                'withoutPhoto',
+                'colored',
+                'epitaph',
+                'last_name',
+                'first_name',
+                'patronymic',
+                'birthday',
+                'death',
+                'rituals.created_at',
+            )->get();
         } else {
-            $list = Ritual::where('user_id', $user_id)->leftJoin('users', 'rituals.user_id', '=', 'users.id')->get();
-//            $list = Ritual::leftJoin('users', 'rituals.user_id', '=', 'users.id')->where('user_id', $user_id)->get();
-//            $list = Ritual::where('user_id', $user_id)->get();
-//            $user_name = User::where('id', $user_id)->value('name');
+            $list = Ritual::where('user_id', $user_id)->Join('users', 'users.id', '=', 'rituals.user_id')->select(
+                'rituals.id',
+                'name',
+                'order_number',
+                'hash_name',
+                'shape',
+                'orientation',
+                'holes',
+                'sizes',
+                'frame',
+                'background',
+                'cross',
+                'withText',
+                'withoutPhoto',
+                'colored',
+                'epitaph',
+                'last_name',
+                'first_name',
+                'patronymic',
+                'birthday',
+                'death',
+                'rituals.created_at',
+            )->get();
         }
 
         return response()->json([
@@ -49,6 +88,19 @@ class RitualOrderController extends Controller
      */
     public function deleteOrder($id)
     {
+        $user_id = auth()->id();
+
+        if ($user_id == 1) {
+            $user_id = Ritual::where('id', $id)->value('user_id');
+        }
+
+        $path    = 'public/ritual/'.$user_id;
+
+        $name = Ritual::where('id', $id)->value('hash_name');
+
+        Storage::delete($path . '/origin/' . $name);
+        Storage::delete($path . '/thumbnail/' . $name);
+
         Ritual::where('id', $id)-> delete();
 
         return response()->json([
